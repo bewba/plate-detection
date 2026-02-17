@@ -1,6 +1,20 @@
 import torch
-from ultralytics import YOLO
 import easyocr
+import ultralytics
+from ultralytics import YOLO
+
+torch.serialization.add_safe_globals([
+    torch.nn.modules.container.Sequential,
+    torch.nn.modules.conv.Conv2d,
+    torch.nn.modules.batchnorm.BatchNorm2d,
+    torch.nn.modules.activation.SiLU,
+    ultralytics.nn.tasks.DetectionModel,
+    ultralytics.nn.modules.block.C2f,
+    ultralytics.nn.modules.block.Bottleneck,
+    ultralytics.nn.modules.conv.Conv, # The one your error just mentioned
+    ultralytics.nn.modules.block.DFL,
+    ultralytics.nn.modules.head.Detect
+])
 
 # 1. Test PyTorch + ROCm
 print(f"--- Hardware Check ---")

@@ -13,6 +13,7 @@ services:
       - "39" # Example GID for video
       - "107" # Example GID for render
     environment:
+      - TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1
       - HSA_OVERRIDE_GFX_VERSION=10.3.0
       - PYTHONUNBUFFERED=1
     stdin_open: true # Allows interactive input
