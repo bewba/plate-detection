@@ -1,13 +1,11 @@
 FROM rocm/pytorch:latest
 
-# Set environment variables for the RX 6600 XT (Navi 23 / gfx1032)
-# Overriding to 10.3.0 is correct for RDNA2 compatibility.
+# 1. Hardware & Environment Config
 ENV HSA_OVERRIDE_GFX_VERSION=10.3.0
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
-# Install system dependencies
-# Added libgl1 and libglx-mesa0 to ensure the GL stack is complete
+# 2. Install System Dependencies (Mesa/GL/OpenCV support)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 \
     libglx-mesa0 \
@@ -17,12 +15,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Copy the project files
-COPY . /app
+# 3. THE CACHE TRICK: Copy ONLY requirements first
+COPY requirements.txt /app/requirements.txt
 
-# Install Python dependencies
-# We use --extra-index-url just in case, though the base image usually has torch.
-RUN pip install --no-cache-dir \
-    ultralytics \
-    easyocr \
-    opencv-python-headless
+# 4. Install Python Dependencies 
+# Docker will CACHE this layer. As long as requirements.txt doesn't change, 
+# this step will take 0 seconds in future builds.
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 5. Finally, copy the rest of your project code
+# Because this is at the end, changing your code won't trigger the pip install above.
+COPY . /app
